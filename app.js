@@ -1,21 +1,17 @@
 'use strict';
 
-const Levels = [
-    { name: 'Обожаю', color: '#3d8bfd' },
-    { name: 'Нравится', color: '#2fb15b' },
-    { name: 'Нормально', color: '#f0c419' },
-    { name: 'Возможно', color: '#fd8c28' },
-    { name: 'Нет', color: '#e5383b' }
-];
+const LevelColors = ['#3d8bfd', '#2fb15b', '#f0c419', '#fd8c28', '#e5383b'];
 
 const StorageKeys = {
-    ratings: 'kinklist.ratings',
+    ratings: 'kinklist.answers',
     name: 'kinklist.name',
-    list: 'kinklist.list'
+    list: 'kinklist.list',
+    language: 'kinklist.language'
 };
 
 const state = {
-    listText: localStorage.getItem(StorageKeys.list) ?? DefaultKinksText,
+    language: localStorage.getItem(StorageKeys.language) ?? 'en',
+    customListText: localStorage.getItem(StorageKeys.list),
     categories: [],
     ratings: JSON.parse(localStorage.getItem(StorageKeys.ratings) ?? '{}'),
     name: localStorage.getItem(StorageKeys.name) ?? ''
@@ -24,6 +20,7 @@ const state = {
 const elements = {
     top: document.getElementById('top'),
     progress: document.getElementById('progress'),
+    languageToggle: document.getElementById('languageToggle'),
     legend: document.getElementById('legend'),
     categoryNav: document.getElementById('categoryNav'),
     list: document.getElementById('list'),
@@ -42,7 +39,16 @@ const elements = {
 
 let previewFile;
 
+function getStrings() {
+    return Translations[state.language];
+}
+
+function getListText() {
+    return state.customListText ?? DefaultKinksTexts[state.language];
+}
+
 function parseList(text) {
+    const strings = getStrings();
     const categories = [];
     text.split('\n').forEach((rawLine, index) => {
         const line = rawLine.trim();
@@ -55,7 +61,7 @@ function parseList(text) {
         }
         const category = categories.at(-1);
         if (category === undefined) {
-            throw new Error(`Строка ${index + 1}: сначала нужна категория (#Название)`);
+            throw new Error(strings.needCategory(index + 1));
         }
         if (line.startsWith('(') && line.endsWith(')')) {
             category.fields = line.slice(1, -1).split(',').map(field => field.trim()).filter(field => field !== '');
@@ -63,23 +69,31 @@ function parseList(text) {
             const [name, description = ''] = line.slice(1).split(':::').map(part => part.trim());
             category.kinks.push({ name, description });
         } else {
-            throw new Error(`Строка ${index + 1}: непонятный формат «${line}»`);
+            throw new Error(strings.badFormat(index + 1, line));
         }
     });
     const invalid = categories.find(category => category.fields.length === 0);
     if (invalid !== undefined) {
-        throw new Error(`Категория «${invalid.name}»: укажите колонки, например (Делаю, Получаю)`);
+        throw new Error(strings.noFields(invalid.name));
     }
     return categories;
 }
 
-function ratingKey(category, kink, field) {
-    return `${category.name}|${kink.name}|${field}`;
+function ratingKey(categoryIndex, kinkIndex, fieldIndex) {
+    return `${categoryIndex}.${kinkIndex}.${fieldIndex}`;
+}
+
+function getSlots(categories) {
+    return categories.flatMap((category, categoryIndex) =>
+        category.kinks.flatMap((kink, kinkIndex) =>
+            category.fields.map((field, fieldIndex) => ({
+                key: ratingKey(categoryIndex, kinkIndex, fieldIndex),
+                name: `${category.name}|${kink.name}|${field}`
+            }))));
 }
 
 function getAllKeys() {
-    return state.categories.flatMap(category =>
-        category.kinks.flatMap(kink => category.fields.map(field => ratingKey(category, kink, field))));
+    return getSlots(state.categories).map(slot => slot.key);
 }
 
 function categoryColor(index, count) {
@@ -95,29 +109,45 @@ function createElement(tag, className, text) {
     return element;
 }
 
-function createLegendItem(level) {
+function createLegendItem(name, index) {
     const item = createElement('span', 'legend-item');
     const dot = createElement('span', 'dot');
-    dot.style.setProperty('--color', level.color);
-    item.append(dot, level.name);
+    dot.style.setProperty('--color', LevelColors[index]);
+    item.append(dot, name);
     return item;
+}
+
+function applyTranslations() {
+    const strings = getStrings();
+    document.documentElement.lang = state.language;
+    document.title = strings.title;
+    for (const element of document.querySelectorAll('[data-i18n]')) {
+        element.textContent = strings[element.dataset.i18n];
+    }
+    for (const element of document.querySelectorAll('[data-i18n-placeholder]')) {
+        element.placeholder = strings[element.dataset.i18nPlaceholder];
+    }
+    for (const element of document.querySelectorAll('[data-i18n-aria-label]')) {
+        element.setAttribute('aria-label', strings[element.dataset.i18nAriaLabel]);
+    }
+    elements.languageToggle.textContent = strings.switchLabel;
+    elements.legend.replaceChildren(...strings.levels.map(createLegendItem));
 }
 
 function renderList() {
     const sections = [];
     const chips = [];
-    state.categories.forEach((category, index) => {
+    state.categories.forEach((category, categoryIndex) => {
+        const color = categoryColor(categoryIndex, state.categories.length);
         const section = createElement('section', 'category');
-        section.style.setProperty('--cat', categoryColor(index, state.categories.length));
+        section.style.setProperty('--cat', color);
         section.append(createElement('h2', 'category-title', category.name));
-        for (const kink of category.kinks) {
-            section.append(renderKink(category, kink));
-        }
+        category.kinks.forEach((kink, kinkIndex) => section.append(renderKink(category, kink, categoryIndex, kinkIndex)));
         sections.push(section);
 
         const chip = createElement('button', 'chip', category.name);
         chip.type = 'button';
-        chip.style.setProperty('--cat', categoryColor(index, state.categories.length));
+        chip.style.setProperty('--cat', color);
         chip.addEventListener('click', () => scrollToSection(section));
         chips.push(chip);
     });
@@ -126,32 +156,33 @@ function renderList() {
     updateProgress();
 }
 
-function renderKink(category, kink) {
+function renderKink(category, kink, categoryIndex, kinkIndex) {
+    const levelNames = getStrings().levels;
     const row = createElement('div', kink.description === '' ? 'kink' : 'kink has-description');
     row.append(createElement('div', 'kink-name', kink.name));
     if (kink.description !== '') {
         row.append(createElement('p', 'kink-description', kink.description));
     }
     const fields = createElement('div', 'kink-fields');
-    for (const field of category.fields) {
+    category.fields.forEach((field, fieldIndex) => {
         const group = createElement('div', 'field');
         if (category.fields.length > 1) {
             group.append(createElement('span', 'field-label', field));
         }
         const choices = createElement('div', 'choices');
-        choices.dataset.key = ratingKey(category, kink, field);
-        Levels.forEach((level, index) => {
+        choices.dataset.key = ratingKey(categoryIndex, kinkIndex, fieldIndex);
+        LevelColors.forEach((color, index) => {
             const choice = createElement('button', 'choice');
             choice.type = 'button';
             choice.dataset.level = index + 1;
-            choice.style.setProperty('--color', level.color);
-            choice.setAttribute('aria-label', `${field}: ${level.name}`);
+            choice.style.setProperty('--color', color);
+            choice.setAttribute('aria-label', `${field}: ${levelNames[index]}`);
             choices.append(choice);
         });
         updateChoices(choices);
         group.append(choices);
         fields.append(group);
-    }
+    });
     row.append(fields);
     return row;
 }
@@ -196,6 +227,14 @@ function saveName() {
     localStorage.setItem(StorageKeys.name, state.name);
 }
 
+function switchLanguage() {
+    state.language = state.language === 'en' ? 'ru' : 'en';
+    localStorage.setItem(StorageKeys.language, state.language);
+    state.categories = parseList(getListText());
+    applyTranslations();
+    renderList();
+}
+
 function encodeRatings() {
     const values = getAllKeys().map(key => state.ratings[key] ?? 0);
     let code = '';
@@ -223,13 +262,14 @@ function applySharedLink() {
         return;
     }
     history.replaceState(null, '', location.pathname + location.search);
+    const strings = getStrings();
     const code = params.get('r');
     if (code.length !== Math.ceil(getAllKeys().length / 2) || !/^[0-9a-z]*$/.test(code)) {
-        alert('Ссылка создана для другого списка.');
+        alert(strings.wrongLink);
         return;
     }
     const hasOwnRatings = Object.keys(state.ratings).length > 0;
-    if (hasOwnRatings && !confirm('Открыть ответы из ссылки? Ваши текущие ответы будут заменены.')) {
+    if (hasOwnRatings && !confirm(strings.confirmLink)) {
         return;
     }
     state.ratings = decodeRatings(code);
@@ -245,17 +285,18 @@ function ignoreAbort(error) {
 }
 
 async function shareLink() {
+    const strings = getStrings();
     const params = new URLSearchParams({ r: encodeRatings() });
     if (state.name !== '') {
         params.set('n', state.name);
     }
     const url = `${location.origin}${location.pathname}#${params}`;
     if (navigator.share) {
-        await navigator.share({ title: 'Кинклист', url }).catch(ignoreAbort);
+        await navigator.share({ title: strings.title, url }).catch(ignoreAbort);
         return;
     }
     await navigator.clipboard.writeText(url);
-    elements.shareLink.textContent = 'Ссылка скопирована';
+    elements.shareLink.textContent = strings.linkCopied;
 }
 
 async function exportImage() {
@@ -277,9 +318,25 @@ function exportPdf() {
 }
 
 function openEditor() {
-    elements.listText.value = state.listText;
+    elements.listText.value = getListText();
     elements.editorError.textContent = '';
     elements.editorDialog.showModal();
+}
+
+function remapRatings(oldCategories, newCategories) {
+    const levelsByName = new Map();
+    for (const slot of getSlots(oldCategories)) {
+        if (slot.key in state.ratings) {
+            levelsByName.set(slot.name, state.ratings[slot.key]);
+        }
+    }
+    const ratings = {};
+    for (const slot of getSlots(newCategories)) {
+        if (levelsByName.has(slot.name)) {
+            ratings[slot.key] = levelsByName.get(slot.name);
+        }
+    }
+    return ratings;
 }
 
 function saveList() {
@@ -291,11 +348,14 @@ function saveList() {
         elements.editorError.textContent = error.message;
         return;
     }
-    state.listText = text;
+    state.ratings = remapRatings(state.categories, categories);
     state.categories = categories;
-    if (text === DefaultKinksText) {
+    saveRatings();
+    if (Object.values(DefaultKinksTexts).includes(text)) {
+        state.customListText = null;
         localStorage.removeItem(StorageKeys.list);
     } else {
+        state.customListText = text;
         localStorage.setItem(StorageKeys.list, text);
     }
     renderList();
@@ -303,7 +363,7 @@ function saveList() {
 }
 
 function resetRatings() {
-    if (!confirm('Удалить все ответы?')) {
+    if (!confirm(getStrings().confirmReset)) {
         return;
     }
     state.ratings = {};
@@ -324,9 +384,10 @@ function bindEvents() {
         }
     });
 
+    elements.languageToggle.addEventListener('click', switchLanguage);
     document.getElementById('openExport').addEventListener('click', () => {
         elements.nameInput.value = state.name;
-        elements.shareLink.textContent = 'Ссылка на ответы';
+        elements.shareLink.textContent = getStrings().shareLink;
         elements.exportDialog.showModal();
     });
     elements.nameInput.addEventListener('input', () => {
@@ -337,18 +398,18 @@ function bindEvents() {
     document.getElementById('exportPdf').addEventListener('click', exportPdf);
     elements.shareLink.addEventListener('click', shareLink);
     elements.shareImage.addEventListener('click', () =>
-        navigator.share({ files: [previewFile], title: 'Кинклист' }).catch(ignoreAbort));
+        navigator.share({ files: [previewFile], title: getStrings().title }).catch(ignoreAbort));
 
     document.getElementById('openEditor').addEventListener('click', openEditor);
     document.getElementById('restoreList').addEventListener('click', () => {
-        elements.listText.value = DefaultKinksText;
+        elements.listText.value = DefaultKinksTexts[state.language];
     });
     document.getElementById('saveList').addEventListener('click', saveList);
     document.getElementById('resetRatings').addEventListener('click', resetRatings);
 }
 
-state.categories = parseList(state.listText);
-elements.legend.append(...Levels.map(createLegendItem));
+state.categories = parseList(getListText());
+applyTranslations();
 applySharedLink();
 renderList();
 bindEvents();

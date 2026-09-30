@@ -27,14 +27,15 @@ const ImageColors = {
 
 function getExportCategories(onlyRated) {
     return state.categories
-        .map((category, index) => ({
+        .map((category, categoryIndex) => ({
             name: category.name,
             fields: category.fields,
-            color: categoryColor(index, state.categories.length),
+            color: categoryColor(categoryIndex, state.categories.length),
             kinks: category.kinks
-                .map(kink => ({
+                .map((kink, kinkIndex) => ({
                     name: kink.name,
-                    levels: category.fields.map(field => state.ratings[ratingKey(category, kink, field)] ?? 0)
+                    levels: category.fields.map((field, fieldIndex) =>
+                        state.ratings[ratingKey(categoryIndex, kinkIndex, fieldIndex)] ?? 0)
                 }))
                 .filter(kink => !onlyRated || kink.levels.some(level => level > 0))
         }))
@@ -42,12 +43,13 @@ function getExportCategories(onlyRated) {
 }
 
 function getExportTitle() {
-    return state.name === '' ? 'Кинклист' : state.name;
+    return state.name === '' ? getStrings().title : state.name;
 }
 
 function getExportSubtitle() {
-    const date = new Date().toLocaleDateString('ru-RU');
-    return state.name === '' ? date : `Кинклист · ${date}`;
+    const strings = getStrings();
+    const date = new Date().toLocaleDateString(strings.dateLocale);
+    return state.name === '' ? date : `${strings.title} · ${date}`;
 }
 
 function renderImage(onlyRated) {
@@ -96,15 +98,15 @@ function measureLegend(context, maxWidth) {
     const items = [];
     let x = 0;
     let line = 0;
-    for (const level of Levels) {
-        const itemWidth = 20 + context.measureText(level.name).width;
+    getStrings().levels.forEach((name, index) => {
+        const itemWidth = 20 + context.measureText(name).width;
         if (x > 0 && x + itemWidth > maxWidth) {
             x = 0;
             line++;
         }
-        items.push({ level, x, line });
+        items.push({ name, level: index + 1, x, line });
         x += itemWidth + 18;
-    }
+    });
     return { items, height: (line + 1) * 24 };
 }
 
@@ -157,9 +159,9 @@ function drawHeader(context, legend) {
     const legendY = y + 34 + 28 + 18 + 12;
     for (const item of legend.items) {
         const centerY = legendY + item.line * 24;
-        drawCircle(context, x + item.x + 7, centerY, Levels.indexOf(item.level) + 1);
+        drawCircle(context, x + item.x + 7, centerY, item.level);
         context.fillStyle = ImageColors.text;
-        context.fillText(item.level.name, x + item.x + 20, centerY);
+        context.fillText(item.name, x + item.x + 20, centerY);
     }
 }
 
@@ -212,7 +214,7 @@ function drawCircle(context, x, y, level) {
     context.beginPath();
     context.arc(x, y, ImageLayout.circleRadius, 0, Math.PI * 2);
     if (level > 0) {
-        context.fillStyle = Levels[level - 1].color;
+        context.fillStyle = LevelColors[level - 1];
         context.fill();
     } else {
         context.strokeStyle = ImageColors.empty;
@@ -237,7 +239,7 @@ function renderReport(onlyRated) {
     const titles = createElement('div', 'report-titles');
     titles.append(createElement('h1', '', getExportTitle()), createElement('p', 'report-subtitle', getExportSubtitle()));
     const legend = createElement('div', 'report-legend');
-    legend.append(...Levels.map(createLegendItem));
+    legend.append(...getStrings().levels.map(createLegendItem));
     header.append(titles, legend);
 
     const columns = createElement('div', 'report-columns');
@@ -260,7 +262,7 @@ function renderReport(onlyRated) {
                 cell.className = 'dot-cell';
                 const dot = createElement('span', level > 0 ? 'dot' : 'dot empty');
                 if (level > 0) {
-                    dot.style.setProperty('--color', Levels[level - 1].color);
+                    dot.style.setProperty('--color', LevelColors[level - 1]);
                 }
                 cell.append(dot);
             }
