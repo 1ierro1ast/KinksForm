@@ -35,7 +35,12 @@ const Translations = {
         cloudError: 'Could not sync with Telegram:',
         shareProfile: 'Share my answers',
         shareMessage: 'My kinklist answers',
-        myAnswers: 'My answers',
+        fillOwn: 'Fill in my own',
+        importText: 'Import text',
+        importHint: 'Paste text copied from the export, e.g. from the Telegram app.',
+        importAction: 'Import',
+        importFailed: 'No answers recognized in this text.',
+        confirmImport: 'Replace your current answers with the imported ones?',
         sharedAnswers: name => name === '' ? 'Shared answers' : `${name}'s answers`
     },
     ru: {
@@ -72,7 +77,12 @@ const Translations = {
         cloudError: 'Не удалось синхронизировать с Telegram:',
         shareProfile: 'Поделиться ответами',
         shareMessage: 'Мои ответы в кинклисте',
-        myAnswers: 'Мои ответы',
+        fillOwn: 'Заполнить свою анкету',
+        importText: 'Импорт текста',
+        importHint: 'Вставьте текст из экспорта — например, скопированный в Telegram-приложении.',
+        importAction: 'Импортировать',
+        importFailed: 'Не удалось распознать ни одного ответа.',
+        confirmImport: 'Заменить текущие ответы импортированными?',
         sharedAnswers: name => name === '' ? 'Чужие ответы' : `Ответы: ${name}`
     }
 };

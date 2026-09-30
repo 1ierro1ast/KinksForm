@@ -18,7 +18,6 @@
         </div>
         <div class="shared-banner">
             <span id="sharedTitle" class="shared-title"></span>
-            <button id="closeShared" class="btn" type="button" data-i18n="myAnswers"></button>
         </div>
         <div id="legend" class="legend"></div>
     </header>
@@ -50,6 +49,7 @@
             <button id="exportPdf" class="btn browser-only" type="button" data-i18n="exportPdf"></button>
             <button id="exportText" class="btn" type="button" data-i18n="exportText"></button>
             <button id="shareLink" class="btn browser-only" type="button" data-i18n="shareLink"></button>
+            <button id="openImport" class="btn browser-only" type="button" data-i18n="importText"></button>
         </div>
         <div id="textPreview" class="preview" hidden>
             <textarea id="exportedText" class="input exported-text" readonly></textarea>
@@ -80,12 +80,26 @@
         </div>
     </dialog>
 
+    <dialog id="importDialog" class="sheet">
+        <form method="dialog" class="sheet-header">
+            <h2 data-i18n="importText"></h2>
+            <button class="btn icon" data-i18n-aria-label="close">✕</button>
+        </form>
+        <p class="hint" data-i18n="importHint"></p>
+        <textarea id="importText" class="input exported-text" spellcheck="false"></textarea>
+        <p id="importError" class="error"></p>
+        <div class="actions">
+            <button id="importAnswers" class="btn primary" type="button" data-i18n="importAction"></button>
+        </div>
+    </dialog>
+
     <div id="report" class="report"></div>
 
     <script src="i18n.js"></script>
     <script src="kinks.js"></script>
     <script src="telegram.js"></script>
     <script src="export.js"></script>
+    <script src="import.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

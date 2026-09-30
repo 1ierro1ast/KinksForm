@@ -17,6 +17,8 @@ const ImageLayout = {
     maxPixels: 16000000
 };
 
+const TextMarks = ['⚪', '🔵', '🟢', '🟡', '🟠', '🔴'];
+
 const ImageColors = {
     background: '#ffffff',
     text: '#1d1d24',
@@ -237,15 +239,14 @@ function fitText(context, text, maxWidth) {
 }
 
 function renderText(onlyRated) {
-    const levelMarks = ['🔵', '🟢', '🟡', '🟠', '🔴'];
     const lines = [
         `${getExportTitle()} · ${getExportSubtitle()}`,
-        getStrings().levels.map((name, index) => `${levelMarks[index]} ${name}`).join('  ')
+        getStrings().levels.map((name, index) => `${TextMarks[index + 1]} ${name}`).join('  ')
     ];
     for (const category of getExportCategories(onlyRated)) {
         lines.push('', category.fields.length > 1 ? `${category.name} (${category.fields.join(' / ')})` : category.name);
         for (const kink of category.kinks) {
-            lines.push(`${kink.levels.map(level => level > 0 ? levelMarks[level - 1] : '⚪').join('')} ${kink.name}`);
+            lines.push(`${kink.levels.map(level => TextMarks[level]).join('')} ${kink.name}`);
         }
     }
     return lines.join('\n');

@@ -36,8 +36,8 @@ function saveToCloud(key, value) {
     });
 }
 
-function updateShareButton(text, isVisible) {
-    TelegramApp.MainButton.setParams({ text, is_visible: isVisible });
+function updateMainButton(text) {
+    TelegramApp.MainButton.setParams({ text, is_visible: true });
 }
 
 function shareToTelegram(url, text) {

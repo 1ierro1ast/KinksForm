@@ -43,7 +43,10 @@ const elements = {
     downloadImage: document.getElementById('downloadImage'),
     editorDialog: document.getElementById('editorDialog'),
     listText: document.getElementById('listText'),
-    editorError: document.getElementById('editorError')
+    editorError: document.getElementById('editorError'),
+    importDialog: document.getElementById('importDialog'),
+    importText: document.getElementById('importText'),
+    importError: document.getElementById('importError')
 };
 
 let previewFile;
@@ -154,7 +157,7 @@ function applyTranslations() {
         elements.sharedTitle.textContent = strings.sharedAnswers(state.shared.name);
     }
     if (IsTelegram) {
-        updateShareButton(strings.shareProfile, state.shared === null);
+        updateMainButton(state.shared === null ? strings.shareProfile : strings.fillOwn);
     }
 }
 
@@ -375,6 +378,15 @@ function closeShared() {
     state.shared = null;
     applyTranslations();
     renderList();
+    window.scrollTo(0, 0);
+}
+
+function handleMainButton() {
+    if (state.shared === null) {
+        shareProfile();
+    } else {
+        closeShared();
+    }
 }
 
 function shareProfile() {
@@ -455,6 +467,36 @@ async function copyText() {
     }
 }
 
+function openImport() {
+    elements.importText.value = '';
+    elements.importError.textContent = '';
+    elements.importDialog.showModal();
+}
+
+function importAnswers() {
+    const imported = parseTextExport(elements.importText.value);
+    if (Object.keys(imported.ratings).length === 0) {
+        elements.importError.textContent = getStrings().importFailed;
+        return;
+    }
+    const apply = () => {
+        state.ratings = imported.ratings;
+        state.name = imported.name;
+        saveRatings();
+        saveName();
+        renderList();
+        elements.nameInput.value = state.name;
+        elements.preview.hidden = true;
+        elements.textPreview.hidden = true;
+        elements.importDialog.close();
+    };
+    if (Object.keys(state.ratings).length === 0) {
+        apply();
+    } else {
+        confirmAction(getStrings().confirmImport, apply);
+    }
+}
+
 function exportPdf() {
     renderReport(elements.onlyRated.checked);
     elements.exportDialog.close();
@@ -530,9 +572,8 @@ function bindEvents() {
     });
 
     elements.languageToggle.addEventListener('click', switchLanguage);
-    document.getElementById('closeShared').addEventListener('click', closeShared);
     if (IsTelegram) {
-        TelegramApp.MainButton.onClick(shareProfile);
+        TelegramApp.MainButton.onClick(handleMainButton);
     }
     document.getElementById('openExport').addEventListener('click', () => {
         elements.nameInput.value = state.name;
@@ -547,6 +588,8 @@ function bindEvents() {
     document.getElementById('exportPdf').addEventListener('click', exportPdf);
     document.getElementById('exportText').addEventListener('click', exportText);
     elements.copyText.addEventListener('click', copyText);
+    document.getElementById('openImport').addEventListener('click', openImport);
+    document.getElementById('importAnswers').addEventListener('click', importAnswers);
     elements.shareLink.addEventListener('click', shareLink);
     elements.shareImage.addEventListener('click', () =>
         navigator.share({ files: [previewFile], title: getStrings().title }).catch(ignoreAbort));
