@@ -125,16 +125,11 @@ h1 {
 
 .category-nav {
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
     max-width: 1400px;
     margin: 0 auto;
-    padding-bottom: 10px;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.category-nav::-webkit-scrollbar {
-    display: none;
+    padding: 12px 12px 0;
 }
 
 .chip {
