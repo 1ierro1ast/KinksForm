@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#16161d">
     <title>Kinklist</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <header id="top" class="top">
@@ -23,7 +24,7 @@
     <main id="list" class="list"></main>
 
     <footer class="bottom">
-        <button id="openEditor" class="btn" type="button" data-i18n="editList"></button>
+        <button id="openEditor" class="btn browser-only" type="button" data-i18n="editList"></button>
         <button id="resetRatings" class="btn danger" type="button" data-i18n="resetAnswers"></button>
     </footer>
 
@@ -41,9 +42,16 @@
             <span data-i18n="onlyRated"></span>
         </label>
         <div class="actions">
-            <button id="exportImage" class="btn primary" type="button" data-i18n="exportImage"></button>
-            <button id="exportPdf" class="btn" type="button" data-i18n="exportPdf"></button>
-            <button id="shareLink" class="btn" type="button" data-i18n="shareLink"></button>
+            <button id="exportImage" class="btn primary browser-only" type="button" data-i18n="exportImage"></button>
+            <button id="exportPdf" class="btn browser-only" type="button" data-i18n="exportPdf"></button>
+            <button id="exportText" class="btn" type="button" data-i18n="exportText"></button>
+            <button id="shareLink" class="btn browser-only" type="button" data-i18n="shareLink"></button>
+        </div>
+        <div id="textPreview" class="preview" hidden>
+            <textarea id="exportedText" class="input exported-text" readonly></textarea>
+            <div class="actions">
+                <button id="copyText" class="btn primary" type="button" data-i18n="copy"></button>
+            </div>
         </div>
         <div id="preview" class="preview" hidden>
             <img id="previewImage" alt="Kinklist">
@@ -72,6 +80,7 @@
 
     <script src="i18n.js"></script>
     <script src="kinks.js"></script>
+    <script src="telegram.js"></script>
     <script src="export.js"></script>
     <script src="app.js"></script>
 </body>

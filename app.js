@@ -11,7 +11,7 @@ const StorageKeys = {
 
 const state = {
     language: localStorage.getItem(StorageKeys.language) ?? 'en',
-    customListText: localStorage.getItem(StorageKeys.list),
+    customListText: IsTelegram ? null : localStorage.getItem(StorageKeys.list),
     categories: [],
     ratings: JSON.parse(localStorage.getItem(StorageKeys.ratings) ?? '{}'),
     name: localStorage.getItem(StorageKeys.name) ?? ''
@@ -28,6 +28,9 @@ const elements = {
     nameInput: document.getElementById('nameInput'),
     onlyRated: document.getElementById('onlyRated'),
     shareLink: document.getElementById('shareLink'),
+    textPreview: document.getElementById('textPreview'),
+    exportedText: document.getElementById('exportedText'),
+    copyText: document.getElementById('copyText'),
     preview: document.getElementById('preview'),
     previewImage: document.getElementById('previewImage'),
     shareImage: document.getElementById('shareImage'),
@@ -221,18 +224,65 @@ function rate(choice) {
 
 function saveRatings() {
     localStorage.setItem(StorageKeys.ratings, JSON.stringify(state.ratings));
+    if (IsTelegram) {
+        saveToCloud(CloudKeys.answers, encodeRatings());
+    }
 }
 
 function saveName() {
     localStorage.setItem(StorageKeys.name, state.name);
+    if (IsTelegram) {
+        saveToCloud(CloudKeys.name, state.name);
+    }
+}
+
+function saveLanguage() {
+    localStorage.setItem(StorageKeys.language, state.language);
+    if (IsTelegram) {
+        saveToCloud(CloudKeys.language, state.language);
+    }
+}
+
+function refresh() {
+    state.categories = parseList(getListText());
+    applyTranslations();
+    renderList();
 }
 
 function switchLanguage() {
     state.language = state.language === 'en' ? 'ru' : 'en';
+    saveLanguage();
+    refresh();
+}
+
+function applyCloudData(values) {
+    if (!values.answers) {
+        saveRatings();
+        saveName();
+        saveLanguage();
+        return;
+    }
+    state.language = values.language || state.language;
+    state.name = values.name ?? '';
+    if (isValidCode(values.answers)) {
+        state.ratings = decodeRatings(values.answers);
+    }
+    localStorage.setItem(StorageKeys.ratings, JSON.stringify(state.ratings));
+    localStorage.setItem(StorageKeys.name, state.name);
     localStorage.setItem(StorageKeys.language, state.language);
-    state.categories = parseList(getListText());
-    applyTranslations();
-    renderList();
+    refresh();
+}
+
+function confirmAction(message, onConfirm) {
+    if (IsTelegram) {
+        TelegramApp.showConfirm(message, confirmed => {
+            if (confirmed) {
+                onConfirm();
+            }
+        });
+    } else if (confirm(message)) {
+        onConfirm();
+    }
 }
 
 function encodeRatings() {
@@ -242,6 +292,10 @@ function encodeRatings() {
         code += (values[i] * 6 + (values[i + 1] ?? 0)).toString(36);
     }
     return code;
+}
+
+function isValidCode(code) {
+    return code.length === Math.ceil(getAllKeys().length / 2) && /^[0-9a-z]*$/.test(code);
 }
 
 function decodeRatings(code) {
@@ -264,7 +318,7 @@ function applySharedLink() {
     history.replaceState(null, '', location.pathname + location.search);
     const strings = getStrings();
     const code = params.get('r');
-    if (code.length !== Math.ceil(getAllKeys().length / 2) || !/^[0-9a-z]*$/.test(code)) {
+    if (!isValidCode(code)) {
         alert(strings.wrongLink);
         return;
     }
@@ -306,9 +360,27 @@ async function exportImage() {
     elements.previewImage.src = url;
     elements.downloadImage.href = url;
     previewFile = new File([blob], 'kinklist.png', { type: 'image/png' });
+    elements.textPreview.hidden = true;
     elements.shareImage.hidden = !(navigator.canShare && navigator.canShare({ files: [previewFile] }));
     elements.preview.hidden = false;
     elements.preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function exportText() {
+    elements.exportedText.value = renderText(elements.onlyRated.checked);
+    elements.copyText.textContent = getStrings().copy;
+    elements.preview.hidden = true;
+    elements.textPreview.hidden = false;
+    elements.textPreview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function copyText() {
+    elements.exportedText.select();
+    const copied = await navigator.clipboard.writeText(elements.exportedText.value)
+        .then(() => true, () => document.execCommand('copy'));
+    if (copied) {
+        elements.copyText.textContent = getStrings().copied;
+    }
 }
 
 function exportPdf() {
@@ -363,12 +435,11 @@ function saveList() {
 }
 
 function resetRatings() {
-    if (!confirm(getStrings().confirmReset)) {
-        return;
-    }
-    state.ratings = {};
-    saveRatings();
-    renderList();
+    confirmAction(getStrings().confirmReset, () => {
+        state.ratings = {};
+        saveRatings();
+        renderList();
+    });
 }
 
 function bindEvents() {
@@ -396,6 +467,8 @@ function bindEvents() {
     });
     document.getElementById('exportImage').addEventListener('click', exportImage);
     document.getElementById('exportPdf').addEventListener('click', exportPdf);
+    document.getElementById('exportText').addEventListener('click', exportText);
+    elements.copyText.addEventListener('click', copyText);
     elements.shareLink.addEventListener('click', shareLink);
     elements.shareImage.addEventListener('click', () =>
         navigator.share({ files: [previewFile], title: getStrings().title }).catch(ignoreAbort));
@@ -408,8 +481,14 @@ function bindEvents() {
     document.getElementById('resetRatings').addEventListener('click', resetRatings);
 }
 
+if (IsTelegram) {
+    initTelegram();
+}
 state.categories = parseList(getListText());
 applyTranslations();
 applySharedLink();
 renderList();
 bindEvents();
+if (IsTelegram) {
+    loadFromCloud(applyCloudData);
+}

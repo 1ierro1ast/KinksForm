@@ -14,6 +14,9 @@ const Translations = {
         onlyRated: 'Only rated items',
         exportImage: 'PNG image',
         exportPdf: 'PDF / print',
+        exportText: 'Text',
+        copy: 'Copy',
+        copied: 'Copied',
         shareLink: 'Link to answers',
         linkCopied: 'Link copied',
         share: 'Share',
@@ -28,7 +31,8 @@ const Translations = {
         noFields: name => `Category "${name}": add columns, e.g. (Giving, Receiving)`,
         wrongLink: 'This link was made for a different list.',
         confirmLink: 'Open answers from the link? Your current answers will be replaced.',
-        confirmReset: 'Delete all answers?'
+        confirmReset: 'Delete all answers?',
+        cloudError: 'Could not sync with Telegram:'
     },
     ru: {
         switchLabel: 'EN',
@@ -43,6 +47,9 @@ const Translations = {
         onlyRated: 'Только отмеченные пункты',
         exportImage: 'Картинка PNG',
         exportPdf: 'PDF / печать',
+        exportText: 'Текст',
+        copy: 'Скопировать',
+        copied: 'Скопировано',
         shareLink: 'Ссылка на ответы',
         linkCopied: 'Ссылка скопирована',
         share: 'Поделиться',
@@ -57,6 +64,7 @@ const Translations = {
         noFields: name => `Категория «${name}»: укажите колонки, например (Делаю, Получаю)`,
         wrongLink: 'Ссылка создана для другого списка.',
         confirmLink: 'Открыть ответы из ссылки? Ваши текущие ответы будут заменены.',
-        confirmReset: 'Удалить все ответы?'
+        confirmReset: 'Удалить все ответы?',
+        cloudError: 'Не удалось синхронизировать с Telegram:'
     }
 };

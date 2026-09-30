@@ -234,6 +234,21 @@ function fitText(context, text, maxWidth) {
     return `${fitted}…`;
 }
 
+function renderText(onlyRated) {
+    const levelMarks = ['🔵', '🟢', '🟡', '🟠', '🔴'];
+    const lines = [
+        `${getExportTitle()} · ${getExportSubtitle()}`,
+        getStrings().levels.map((name, index) => `${levelMarks[index]} ${name}`).join('  ')
+    ];
+    for (const category of getExportCategories(onlyRated)) {
+        lines.push('', category.fields.length > 1 ? `${category.name} (${category.fields.join(' / ')})` : category.name);
+        for (const kink of category.kinks) {
+            lines.push(`${kink.levels.map(level => level > 0 ? levelMarks[level - 1] : '⚪').join('')} ${kink.name}`);
+        }
+    }
+    return lines.join('\n');
+}
+
 function renderReport(onlyRated) {
     const header = createElement('header', 'report-header');
     const titles = createElement('div', 'report-titles');

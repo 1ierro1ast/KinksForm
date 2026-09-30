@@ -20,6 +20,20 @@
     }
 }
 
+.telegram {
+    --bg: var(--tg-theme-secondary-bg-color);
+    --surface: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color));
+    --text: var(--tg-theme-text-color);
+    --muted: var(--tg-theme-hint-color);
+    --line: var(--tg-theme-section-separator-color, var(--tg-theme-secondary-bg-color));
+    --accent: var(--tg-theme-button-color);
+    --header-bg: var(--tg-theme-bg-color);
+}
+
+.telegram .browser-only {
+    display: none;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -363,6 +377,13 @@ h1 {
     border: 1px solid var(--line);
     border-radius: 12px;
     background: #ffffff;
+}
+
+.exported-text {
+    height: 40vh;
+    margin-bottom: 10px;
+    font-size: 14px;
+    resize: vertical;
 }
 
 .hint {
