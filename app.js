@@ -149,6 +149,9 @@ function applyTranslations() {
     if (state.shared !== null) {
         elements.sharedTitle.textContent = strings.sharedAnswers(state.shared.name);
     }
+    if (IsTelegram) {
+        updateShareButton(strings.shareProfile, state.shared === null);
+    }
 }
 
 function renderList() {
@@ -509,7 +512,9 @@ function bindEvents() {
 
     elements.languageToggle.addEventListener('click', switchLanguage);
     document.getElementById('closeShared').addEventListener('click', closeShared);
-    document.getElementById('shareProfile').addEventListener('click', shareProfile);
+    if (IsTelegram) {
+        TelegramApp.MainButton.onClick(shareProfile);
+    }
     document.getElementById('openExport').addEventListener('click', () => {
         elements.nameInput.value = state.name;
         elements.shareLink.textContent = getStrings().shareLink;

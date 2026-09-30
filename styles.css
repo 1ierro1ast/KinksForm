@@ -31,7 +31,6 @@
 }
 
 .telegram .browser-only,
-:root:not(.telegram) .telegram-only,
 .viewing .own-only {
     display: none;
 }

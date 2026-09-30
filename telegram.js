@@ -36,6 +36,10 @@ function saveToCloud(key, value) {
     });
 }
 
+function updateShareButton(text, isVisible) {
+    TelegramApp.MainButton.setParams({ text, is_visible: isVisible });
+}
+
 function shareToTelegram(url, text) {
     TelegramApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
 }
