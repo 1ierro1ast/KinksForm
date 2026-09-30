@@ -33,6 +33,8 @@ const DefaultKinksTexts = {
 * You and 2 males ::: A threesome with two men.
 * You and 2 females ::: A threesome with two women.
 * Orgy ::: Group sex with many participants.
+* You and a trans woman ::: Sex with a trans woman (MtF).
+* You and a trans man ::: Sex with a trans man (FtM).
 
 #General
 (Giving, Receiving)
@@ -112,6 +114,9 @@ const DefaultKinksTexts = {
 * Forced orgasm ::: Making the partner come again and again, beyond their comfort.
 * Orgasm control ::: The dominant decides when the partner may come.
 * Orgasm denial ::: Not letting the partner come for an agreed time.
+* Power exchange ::: Consciously handing control to the partner for a scene or longer.
+* Name calling ::: Degrading or possessive names like "slut" or "toy" during sex.
+* Feminization ::: Making the partner more feminine: clothes, makeup, behavior.
 
 #Scenarios
 (Being center, Participating)
@@ -141,8 +146,16 @@ const DefaultKinksTexts = {
 * Non-con / rape play ::: A pre-agreed scenario of simulated force and resistance.
 * Roleplay necrophilia ::: One partner plays motionless and unresponsive, as if dead.
 * War symbolism ::: Military uniforms and symbols of historical regimes in play.
-* Cheating ::: Fantasies or roleplay about infidelity, including cuckolding.
+* Cheating ::: Fantasies or roleplay about infidelity.
 * Real public use ::: Sex or sexual acts in actual public places.
+* Dubious consent ::: Blurry consent: pressure, persuasion, a "no" that turns into "yes". As a pre-agreed game.
+* Blackmail / coercion ::: A scenario where one partner forces the other through blackmail or threats.
+* Drugs ::: Scenarios involving drugs or a partner being drugged.
+* Alcohol ::: Sex while drunk, or scenarios with a drunk partner.
+* Age gap ::: A big age difference between adult partners.
+* Interracial ::: Partners of different races as a turn-on in itself.
+* Raceplay ::: Roleplay built on racial stereotypes or slurs.
+* Bestiality ::: Fantasies involving animals.
 
 #Surrealism
 (Self, Observing)
@@ -152,6 +165,8 @@ const DefaultKinksTexts = {
 * Tentacles ::: Fantasy sex involving tentacles.
 * Monsters / beasts ::: Fantasy sex with monsters and mythical creatures.
 * Aliens ::: Fantasy sex with extraterrestrials.
+* Vore ::: Fantasies about swallowing someone whole or being swallowed.
+* Ghosts ::: Sex with ghosts and other spirits.
 
 #Fluids
 (General)
@@ -159,6 +174,9 @@ const DefaultKinksTexts = {
 * Watersports ::: Urine play.
 * Scat ::: Feces play.
 * Cum play ::: Playing with semen: on the body, passing it mouth to mouth, and so on.
+* Lactation ::: Breast milk: suckling, milking, drinking.
+* Diapers ::: Wearing or using diapers in play.
+* Saliva / spit ::: Spitting, drool, sharing saliva.
 
 #Touch & Stimulation
 (Giving, Receiving)
@@ -196,6 +214,25 @@ const DefaultKinksTexts = {
 * Sounding ::: Inserting special rods into the urethra.
 * Bruising (short-lasting) ::: Marks that fade within a few days.
 * Markings (long-lasting) ::: Marks that stay for a long time.
+* Choking / gagging ::: A hand on the throat, or gagging on a cock or fingers. Dangerous and needs care.
+
+#Bodies
+(General)
+* Skinny ::: Thin, slender partners.
+* Chubby ::: Soft, full-figured partners.
+* Small breasts ::: Partners with small breasts.
+* Large breasts ::: Partners with large breasts.
+* Small cocks ::: A smaller than average penis.
+* Large cocks ::: A larger than average penis.
+* Small butts ::: Partners with a small butt.
+* Big butts ::: Partners with a big butt.
+
+#Misc. Fetish
+(Giving, Receiving)
+* Impregnation / breeding ::: Fantasies about getting pregnant or getting the partner pregnant.
+* Pregnancy ::: Sex with a pregnant partner or during pregnancy.
+* Cuckold / cuckquean ::: Watching or knowing that your partner has sex with someone else.
+* Shaving ::: Shaving the partner's body or being shaved.
 `.trim(),
     ru: `
 #Близость
@@ -229,6 +266,8 @@ const DefaultKinksTexts = {
 * Тройничок: двое мужчин ::: Втроём с двумя мужчинами.
 * Тройничок: две женщины ::: Втроём с двумя женщинами.
 * Оргия ::: Групповой секс, много участников.
+* С транс-женщиной ::: Секс с транс-женщиной (MtF).
+* С транс-мужчиной ::: Секс с транс-мужчиной (FtM).
 
 #Основное
 (Делаю, Получаю)
@@ -308,6 +347,9 @@ const DefaultKinksTexts = {
 * Принудительный оргазм ::: Доводить до оргазма снова и снова, за пределы комфорта.
 * Контроль оргазма ::: Дом решает, когда партнёру можно кончить.
 * Запрет оргазма ::: Не давать кончить в течение оговорённого времени.
+* Обмен властью ::: Осознанно передать партнёру контроль на сцену или дольше.
+* Обзывательства ::: Унизительные или собственнические прозвища вроде «шлюшка» или «игрушка» во время секса.
+* Феминизация ::: Делать партнёра женственнее: одежда, макияж, поведение.
 
 #Сценарии
 (Я в центре, Участвую)
@@ -337,8 +379,16 @@ const DefaultKinksTexts = {
 * Ролевое изнасилование ::: Заранее оговорённый сценарий с имитацией принуждения и сопротивления.
 * Ролевая некрофилия ::: Один партнёр изображает неподвижного и безучастного, словно мёртвого.
 * Военная символика ::: Военная форма и символика исторических режимов в игре.
-* Измена ::: Фантазии или ролевые игры об измене, в том числе куколдинг.
+* Измена ::: Фантазии или ролевые игры об измене.
 * Секс в публичных местах ::: Секс или сексуальные действия в настоящих общественных местах.
+* Сомнительное согласие ::: Размытое согласие: давление, уговоры, «нет», которое становится «да». Как оговорённая игра.
+* Шантаж, принуждение ::: Сценарий, где один партнёр принуждает другого шантажом или угрозами.
+* Наркотики ::: Сценарии с наркотиками или партнёром «под веществами».
+* Алкоголь ::: Секс навеселе или сценарии с пьяным партнёром.
+* Большая разница в возрасте ::: Большая разница в возрасте между взрослыми партнёрами.
+* Межрасовый секс ::: Разная раса партнёров как отдельный возбуждающий момент.
+* Рейсплей ::: Ролевые игры на расовых стереотипах или оскорблениях.
+* Зоофилия ::: Фантазии с участием животных.
 
 #Фантастика
 (Играю, Смотрю)
@@ -348,6 +398,8 @@ const DefaultKinksTexts = {
 * Тентакли ::: Фантазии о сексе со щупальцами.
 * Монстры и звери ::: Фантазии о сексе с монстрами и мифическими существами.
 * Пришельцы ::: Фантазии о сексе с инопланетянами.
+* Вор (vore) ::: Фантазии о том, чтобы проглотить кого-то целиком или быть проглоченным.
+* Призраки ::: Секс с призраками и другими духами.
 
 #Жидкости
 (Общее)
@@ -355,6 +407,9 @@ const DefaultKinksTexts = {
 * Золотой дождь ::: Игры с мочой.
 * Скат ::: Игры с фекалиями.
 * Игры со спермой ::: Сперма на теле, передача изо рта в рот и тому подобное.
+* Лактация ::: Грудное молоко: сосать, сцеживать, пить.
+* Подгузники ::: Носить или использовать подгузники в игре.
+* Слюна, плевки ::: Плевки, слюни, обмен слюной.
 
 #Тело и ощущения
 (Делаю, Получаю)
@@ -392,5 +447,24 @@ const DefaultKinksTexts = {
 * Саундинг ::: Введение специальных стержней в уретру.
 * Синяки ::: Следы, которые сходят за несколько дней.
 * Долгие следы ::: Отметины, которые остаются надолго.
+* Придушивание ::: Рука на горле или рвотный рефлекс от члена или пальцев. Опасно, нужна осторожность.
+
+#Типаж
+(Общее)
+* Худые ::: Стройные, худощавые партнёры.
+* Пышные ::: Мягкие, пухленькие партнёры.
+* Маленькая грудь ::: Партнёры с маленькой грудью.
+* Большая грудь ::: Партнёры с большой грудью.
+* Небольшой член ::: Член меньше среднего.
+* Большой член ::: Член больше среднего.
+* Маленькая попа ::: Партнёры с маленькой попой.
+* Большая попа ::: Партнёры с большой попой.
+
+#Разное
+(Делаю, Получаю)
+* Оплодотворение ::: Фантазии о том, чтобы забеременеть или оплодотворить партнёра.
+* Беременность ::: Секс с беременной партнёршей или во время беременности.
+* Куколд, куквин ::: Смотреть или знать, что партнёр занимается сексом с кем-то другим.
+* Бритьё ::: Брить тело партнёра или быть побритым.
 `.trim()
 };

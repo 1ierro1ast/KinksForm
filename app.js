@@ -2,6 +2,10 @@
 
 const LevelColors = ['#3d8bfd', '#2fb15b', '#f0c419', '#fd8c28', '#e5383b'];
 
+const LegacyLayouts = [
+    [[1, 7], [2, 10], [1, 6], [2, 12], [2, 7], [2, 6], [2, 6], [2, 12], [2, 6], [2, 9], [2, 18], [2, 7], [2, 6], [1, 4], [2, 7], [2, 24]]
+];
+
 const StorageKeys = {
     ratings: 'kinklist.answers',
     name: 'kinklist.name',
@@ -285,7 +289,7 @@ function applyCloudData(values) {
     if (isValidCode(values.answers)) {
         state.ratings = decodeRatings(values.answers);
     }
-    localStorage.setItem(StorageKeys.ratings, JSON.stringify(state.ratings));
+    saveRatings();
     localStorage.setItem(StorageKeys.name, state.name);
     localStorage.setItem(StorageKeys.language, state.language);
     refresh();
@@ -312,13 +316,27 @@ function encodeRatings() {
     return code;
 }
 
+function getLayoutKeys(layout) {
+    return layout.flatMap(([fieldCount, kinkCount], categoryIndex) =>
+        Array.from({ length: kinkCount }, (_, kinkIndex) =>
+            Array.from({ length: fieldCount }, (_, fieldIndex) => ratingKey(categoryIndex, kinkIndex, fieldIndex))).flat());
+}
+
+function getCodeKeySets() {
+    return [getAllKeys(), ...LegacyLayouts.map(getLayoutKeys)];
+}
+
+function findCodeKeys(code) {
+    return getCodeKeySets().find(keys => code.length === Math.ceil(keys.length / 2));
+}
+
 function isValidCode(code) {
-    return code.length === Math.ceil(getAllKeys().length / 2) && /^[0-9a-z]*$/.test(code);
+    return /^[0-9a-z]*$/.test(code) && findCodeKeys(code) !== undefined;
 }
 
 function decodeRatings(code) {
     const ratings = {};
-    getAllKeys().forEach((key, index) => {
+    findCodeKeys(code).forEach((key, index) => {
         const pair = parseInt(code[Math.floor(index / 2)], 36);
         const level = index % 2 === 0 ? Math.floor(pair / 6) : pair % 6;
         if (level > 0) {
@@ -343,13 +361,14 @@ function applyStartParam() {
     if (param === undefined) {
         return;
     }
-    const codeLength = Math.ceil(getAllKeys().length / 2);
-    const code = param.slice(0, codeLength);
-    if (!isValidCode(code)) {
+    const code = getCodeKeySets()
+        .map(keys => param.slice(0, Math.ceil(keys.length / 2)))
+        .find(isValidCode);
+    if (code === undefined) {
         TelegramApp.showAlert(getStrings().wrongLink);
         return;
     }
-    state.shared = { ratings: decodeRatings(code), name: decodeBase64Url(param.slice(codeLength)) };
+    state.shared = { ratings: decodeRatings(code), name: decodeBase64Url(param.slice(code.length)) };
 }
 
 function closeShared() {
