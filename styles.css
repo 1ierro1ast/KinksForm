@@ -30,8 +30,31 @@
     --header-bg: var(--tg-theme-bg-color);
 }
 
-.telegram .browser-only {
+.telegram .browser-only,
+:root:not(.telegram) .telegram-only,
+.viewing .own-only {
     display: none;
+}
+
+.shared-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    max-width: 1400px;
+    margin: 0 auto 8px;
+}
+
+.viewing .shared-banner {
+    display: flex;
+}
+
+.shared-title {
+    font-weight: 600;
+}
+
+.viewing .choice {
+    cursor: default;
 }
 
 * {

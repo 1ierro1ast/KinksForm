@@ -26,6 +26,7 @@ const ImageColors = {
 };
 
 function getExportCategories(onlyRated) {
+    const ratings = getVisibleRatings();
     return state.categories
         .map((category, categoryIndex) => ({
             name: category.name,
@@ -35,7 +36,7 @@ function getExportCategories(onlyRated) {
                 .map((kink, kinkIndex) => ({
                     name: kink.name,
                     levels: category.fields.map((field, fieldIndex) =>
-                        state.ratings[ratingKey(categoryIndex, kinkIndex, fieldIndex)] ?? 0)
+                        ratings[ratingKey(categoryIndex, kinkIndex, fieldIndex)] ?? 0)
                 }))
                 .filter(kink => !onlyRated || kink.levels.some(level => level > 0))
         }))
@@ -43,13 +44,14 @@ function getExportCategories(onlyRated) {
 }
 
 function getExportTitle() {
-    return state.name === '' ? getStrings().title : state.name;
+    const name = getVisibleName();
+    return name === '' ? getStrings().title : name;
 }
 
 function getExportSubtitle() {
     const strings = getStrings();
     const date = new Date().toLocaleDateString(strings.dateLocale);
-    return state.name === '' ? date : `${strings.title} · ${date}`;
+    return getVisibleName() === '' ? date : `${strings.title} · ${date}`;
 }
 
 function renderImage(onlyRated) {

@@ -32,7 +32,11 @@ const Translations = {
         wrongLink: 'This link was made for a different list.',
         confirmLink: 'Open answers from the link? Your current answers will be replaced.',
         confirmReset: 'Delete all answers?',
-        cloudError: 'Could not sync with Telegram:'
+        cloudError: 'Could not sync with Telegram:',
+        shareProfile: 'Share my answers',
+        shareMessage: 'My kinklist answers',
+        myAnswers: 'My answers',
+        sharedAnswers: name => name === '' ? 'Shared answers' : `${name}'s answers`
     },
     ru: {
         switchLabel: 'EN',
@@ -65,6 +69,10 @@ const Translations = {
         wrongLink: 'Ссылка создана для другого списка.',
         confirmLink: 'Открыть ответы из ссылки? Ваши текущие ответы будут заменены.',
         confirmReset: 'Удалить все ответы?',
-        cloudError: 'Не удалось синхронизировать с Telegram:'
+        cloudError: 'Не удалось синхронизировать с Telegram:',
+        shareProfile: 'Поделиться ответами',
+        shareMessage: 'Мои ответы в кинклисте',
+        myAnswers: 'Мои ответы',
+        sharedAnswers: name => name === '' ? 'Чужие ответы' : `Ответы: ${name}`
     }
 };

@@ -3,6 +3,8 @@
 const TelegramApp = window.Telegram?.WebApp;
 const IsTelegram = TelegramApp !== undefined && TelegramApp.initData !== '';
 
+const TelegramAppLink = 'https://t.me/KinksForm_bot/kinks_form';
+
 const CloudKeys = {
     answers: 'answers',
     name: 'name',
@@ -32,4 +34,8 @@ function saveToCloud(key, value) {
             TelegramApp.showAlert(`${getStrings().cloudError} ${error}`);
         }
     });
+}
+
+function shareToTelegram(url, text) {
+    TelegramApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
 }

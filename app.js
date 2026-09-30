@@ -14,13 +14,15 @@ const state = {
     customListText: IsTelegram ? null : localStorage.getItem(StorageKeys.list),
     categories: [],
     ratings: JSON.parse(localStorage.getItem(StorageKeys.ratings) ?? '{}'),
-    name: localStorage.getItem(StorageKeys.name) ?? ''
+    name: localStorage.getItem(StorageKeys.name) ?? '',
+    shared: null
 };
 
 const elements = {
     top: document.getElementById('top'),
     progress: document.getElementById('progress'),
     languageToggle: document.getElementById('languageToggle'),
+    sharedTitle: document.getElementById('sharedTitle'),
     legend: document.getElementById('legend'),
     categoryNav: document.getElementById('categoryNav'),
     list: document.getElementById('list'),
@@ -44,6 +46,14 @@ let previewFile;
 
 function getStrings() {
     return Translations[state.language];
+}
+
+function getVisibleRatings() {
+    return state.shared === null ? state.ratings : state.shared.ratings;
+}
+
+function getVisibleName() {
+    return state.shared === null ? state.name : state.shared.name;
 }
 
 function getListText() {
@@ -135,6 +145,10 @@ function applyTranslations() {
     }
     elements.languageToggle.textContent = strings.switchLabel;
     elements.legend.replaceChildren(...strings.levels.map(createLegendItem));
+    document.documentElement.classList.toggle('viewing', state.shared !== null);
+    if (state.shared !== null) {
+        elements.sharedTitle.textContent = strings.sharedAnswers(state.shared.name);
+    }
 }
 
 function renderList() {
@@ -191,7 +205,7 @@ function renderKink(category, kink, categoryIndex, kinkIndex) {
 }
 
 function updateChoices(choices) {
-    const level = state.ratings[choices.dataset.key];
+    const level = getVisibleRatings()[choices.dataset.key];
     for (const choice of choices.children) {
         choice.classList.toggle('selected', Number(choice.dataset.level) === level);
     }
@@ -199,7 +213,8 @@ function updateChoices(choices) {
 
 function updateProgress() {
     const keys = getAllKeys();
-    const rated = keys.filter(key => key in state.ratings).length;
+    const ratings = getVisibleRatings();
+    const rated = keys.filter(key => key in ratings).length;
     elements.progress.textContent = `${rated} / ${keys.length}`;
 }
 
@@ -308,6 +323,41 @@ function decodeRatings(code) {
         }
     });
     return ratings;
+}
+
+function encodeBase64Url(text) {
+    const binary = String.fromCharCode(...new TextEncoder().encode(text));
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function decodeBase64Url(value) {
+    const binary = atob(value.replace(/-/g, '+').replace(/_/g, '/'));
+    return new TextDecoder().decode(Uint8Array.from(binary, character => character.charCodeAt(0)));
+}
+
+function applyStartParam() {
+    const param = TelegramApp.initDataUnsafe.start_param;
+    if (param === undefined) {
+        return;
+    }
+    const codeLength = Math.ceil(getAllKeys().length / 2);
+    const code = param.slice(0, codeLength);
+    if (!isValidCode(code)) {
+        TelegramApp.showAlert(getStrings().wrongLink);
+        return;
+    }
+    state.shared = { ratings: decodeRatings(code), name: decodeBase64Url(param.slice(codeLength)) };
+}
+
+function closeShared() {
+    state.shared = null;
+    applyTranslations();
+    renderList();
+}
+
+function shareProfile() {
+    const name = (state.name || TelegramApp.initDataUnsafe.user.first_name).slice(0, 32);
+    shareToTelegram(`${TelegramAppLink}?startapp=${encodeRatings()}${encodeBase64Url(name)}`, getStrings().shareMessage);
 }
 
 function applySharedLink() {
@@ -446,7 +496,9 @@ function bindEvents() {
     elements.list.addEventListener('click', event => {
         const choice = event.target.closest('.choice');
         if (choice !== null) {
-            rate(choice);
+            if (state.shared === null) {
+                rate(choice);
+            }
             return;
         }
         const name = event.target.closest('.has-description .kink-name');
@@ -456,6 +508,8 @@ function bindEvents() {
     });
 
     elements.languageToggle.addEventListener('click', switchLanguage);
+    document.getElementById('closeShared').addEventListener('click', closeShared);
+    document.getElementById('shareProfile').addEventListener('click', shareProfile);
     document.getElementById('openExport').addEventListener('click', () => {
         elements.nameInput.value = state.name;
         elements.shareLink.textContent = getStrings().shareLink;
@@ -481,10 +535,11 @@ function bindEvents() {
     document.getElementById('resetRatings').addEventListener('click', resetRatings);
 }
 
+state.categories = parseList(getListText());
 if (IsTelegram) {
     initTelegram();
+    applyStartParam();
 }
-state.categories = parseList(getListText());
 applyTranslations();
 applySharedLink();
 renderList();

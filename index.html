@@ -14,7 +14,11 @@
             <h1 data-i18n="title"></h1>
             <span id="progress" class="progress"></span>
             <button id="languageToggle" class="btn" type="button"></button>
-            <button id="openExport" class="btn primary" type="button" data-i18n="export"></button>
+            <button id="openExport" class="btn primary own-only" type="button" data-i18n="export"></button>
+        </div>
+        <div class="shared-banner">
+            <span id="sharedTitle" class="shared-title"></span>
+            <button id="closeShared" class="btn" type="button" data-i18n="myAnswers"></button>
         </div>
         <div id="legend" class="legend"></div>
     </header>
@@ -25,7 +29,7 @@
 
     <footer class="bottom">
         <button id="openEditor" class="btn browser-only" type="button" data-i18n="editList"></button>
-        <button id="resetRatings" class="btn danger" type="button" data-i18n="resetAnswers"></button>
+        <button id="resetRatings" class="btn danger own-only" type="button" data-i18n="resetAnswers"></button>
     </footer>
 
     <dialog id="exportDialog" class="sheet">
@@ -42,6 +46,7 @@
             <span data-i18n="onlyRated"></span>
         </label>
         <div class="actions">
+            <button id="shareProfile" class="btn primary telegram-only" type="button" data-i18n="shareProfile"></button>
             <button id="exportImage" class="btn primary browser-only" type="button" data-i18n="exportImage"></button>
             <button id="exportPdf" class="btn browser-only" type="button" data-i18n="exportPdf"></button>
             <button id="exportText" class="btn" type="button" data-i18n="exportText"></button>
