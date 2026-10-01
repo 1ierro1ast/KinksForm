@@ -176,9 +176,9 @@ function renderList() {
         category.kinks.forEach((kink, kinkIndex) => section.append(renderKink(category, kink, categoryIndex, kinkIndex)));
         sections.push(section);
         if (state.shared !== null) {
-            const pairs = category.kinks.flatMap((kink, kinkIndex) => getMatchPairs(categoryIndex, kinkIndex));
-            if (pairs.length > 0) {
-                title.append(createElement('span', 'category-match', `${getMatchPercent(pairs)}%`));
+            const scores = getCategoryScores(categoryIndex);
+            if (scores.length > 0) {
+                title.append(createElement('span', 'category-match', `${getMatchPercent(scores)}%`));
             }
         }
 
@@ -205,16 +205,30 @@ function getMatchPairs(categoryIndex, kinkIndex) {
     })).filter(pair => pair.theirs !== undefined && pair.mine !== undefined);
 }
 
-function getMatchPercent(pairs) {
-    const score = pairs.reduce((sum, pair) => sum + 1 - Math.abs(pair.theirs - pair.mine) / 4, 0);
-    return Math.round(score / pairs.length * 100);
+function getKinkScores(categoryIndex, kinkIndex) {
+    const noLevel = LevelColors.length;
+    const scores = getMatchPairs(categoryIndex, kinkIndex)
+        .filter(pair => pair.theirs < noLevel || pair.mine < noLevel)
+        .map(pair => (noLevel - Math.max(pair.theirs, pair.mine)) / (noLevel - 1));
+    return scores.length === 0 ? [] : [Math.max(...scores)];
+}
+
+function getCategoryScores(categoryIndex) {
+    return state.categories[categoryIndex].kinks.flatMap((kink, kinkIndex) => getKinkScores(categoryIndex, kinkIndex));
+}
+
+function getMatchPercent(scores) {
+    return Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length * 100);
 }
 
 function updateMatchPercent() {
-    const pairs = state.categories.flatMap((category, categoryIndex) =>
-        category.kinks.flatMap((kink, kinkIndex) => getMatchPairs(categoryIndex, kinkIndex)));
+    const scores = state.categories.flatMap((category, categoryIndex) => getCategoryScores(categoryIndex));
     const strings = getStrings();
-    elements.matchPercent.textContent = pairs.length > 0 ? strings.match(getMatchPercent(pairs)) : strings.noMatch;
+    if (scores.length > 0) {
+        elements.matchPercent.textContent = strings.match(getMatchPercent(scores));
+    } else {
+        elements.matchPercent.textContent = Object.keys(state.ratings).length === 0 ? strings.noMatch : '';
+    }
 }
 
 function renderKink(category, kink, categoryIndex, kinkIndex) {
