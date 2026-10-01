@@ -6,6 +6,8 @@ const LegacyLayouts = [
     [[1, 7], [2, 10], [1, 6], [2, 12], [2, 7], [2, 6], [2, 6], [2, 12], [2, 6], [2, 9], [2, 18], [2, 7], [2, 6], [1, 4], [2, 7], [2, 24]]
 ];
 
+const SameRoleCategories = [11, 12];
+
 const StorageKeys = {
     ratings: 'kinklist.answers',
     name: 'kinklist.name',
@@ -27,6 +29,7 @@ const elements = {
     progress: document.getElementById('progress'),
     languageToggle: document.getElementById('languageToggle'),
     sharedTitle: document.getElementById('sharedTitle'),
+    matchPercent: document.getElementById('matchPercent'),
     legend: document.getElementById('legend'),
     categoryNav: document.getElementById('categoryNav'),
     list: document.getElementById('list'),
@@ -168,9 +171,16 @@ function renderList() {
         const color = categoryColor(categoryIndex, state.categories.length);
         const section = createElement('section', 'category');
         section.style.setProperty('--cat', color);
-        section.append(createElement('h2', 'category-title', category.name));
+        const title = createElement('h2', 'category-title', category.name);
+        section.append(title);
         category.kinks.forEach((kink, kinkIndex) => section.append(renderKink(category, kink, categoryIndex, kinkIndex)));
         sections.push(section);
+        if (state.shared !== null) {
+            const pairs = category.kinks.flatMap((kink, kinkIndex) => getMatchPairs(categoryIndex, kinkIndex));
+            if (pairs.length > 0) {
+                title.append(createElement('span', 'category-match', `${getMatchPercent(pairs)}%`));
+            }
+        }
 
         const chip = createElement('button', 'chip', category.name);
         chip.type = 'button';
@@ -181,11 +191,37 @@ function renderList() {
     elements.list.replaceChildren(...sections);
     elements.categoryNav.replaceChildren(...chips);
     updateProgress();
+    if (state.shared !== null) {
+        updateMatchPercent();
+    }
+}
+
+function getMatchPairs(categoryIndex, kinkIndex) {
+    const fieldCount = state.categories[categoryIndex].fields.length;
+    const isCrossed = fieldCount === 2 && !SameRoleCategories.includes(categoryIndex);
+    return Array.from({ length: fieldCount }, (_, fieldIndex) => ({
+        theirs: state.shared.ratings[ratingKey(categoryIndex, kinkIndex, fieldIndex)],
+        mine: state.ratings[ratingKey(categoryIndex, kinkIndex, isCrossed ? 1 - fieldIndex : fieldIndex)]
+    })).filter(pair => pair.theirs !== undefined && pair.mine !== undefined);
+}
+
+function getMatchPercent(pairs) {
+    const score = pairs.reduce((sum, pair) => sum + 1 - Math.abs(pair.theirs - pair.mine) / 4, 0);
+    return Math.round(score / pairs.length * 100);
+}
+
+function updateMatchPercent() {
+    const pairs = state.categories.flatMap((category, categoryIndex) =>
+        category.kinks.flatMap((kink, kinkIndex) => getMatchPairs(categoryIndex, kinkIndex)));
+    const strings = getStrings();
+    elements.matchPercent.textContent = pairs.length > 0 ? strings.match(getMatchPercent(pairs)) : strings.noMatch;
 }
 
 function renderKink(category, kink, categoryIndex, kinkIndex) {
     const levelNames = getStrings().levels;
     const row = createElement('div', kink.description === '' ? 'kink' : 'kink has-description');
+    const isMutual = state.shared !== null && getMatchPairs(categoryIndex, kinkIndex).some(pair => pair.theirs <= 2 && pair.mine <= 2);
+    row.classList.toggle('mutual', isMutual);
     row.append(createElement('div', 'kink-name', kink.name));
     if (kink.description !== '') {
         row.append(createElement('p', 'kink-description', kink.description));

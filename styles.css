@@ -52,6 +52,21 @@
     font-weight: 600;
 }
 
+.match-percent {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.category-match {
+    float: right;
+    opacity: 0.85;
+}
+
+.mutual .kink-name::before {
+    content: "♥ ";
+    color: #e5383b;
+}
+
 .viewing .choice {
     cursor: default;
 }

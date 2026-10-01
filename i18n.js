@@ -41,7 +41,9 @@ const Translations = {
         importAction: 'Import',
         importFailed: 'No answers recognized in this text.',
         confirmImport: 'Replace your current answers with the imported ones?',
-        sharedAnswers: name => name === '' ? 'Shared answers' : `${name}'s answers`
+        sharedAnswers: name => name === '' ? 'Shared answers' : `${name}'s answers`,
+        match: percent => `Match ${percent}%`,
+        noMatch: 'Fill in yours to see the match'
     },
     ru: {
         switchLabel: 'EN',
@@ -83,6 +85,8 @@ const Translations = {
         importAction: 'Импортировать',
         importFailed: 'Не удалось распознать ни одного ответа.',
         confirmImport: 'Заменить текущие ответы импортированными?',
-        sharedAnswers: name => name === '' ? 'Чужие ответы' : `Ответы: ${name}`
+        sharedAnswers: name => name === '' ? 'Чужие ответы' : `Ответы: ${name}`,
+        match: percent => `Совпадение ${percent}%`,
+        noMatch: 'Заполните свою анкету, чтобы увидеть совпадение'
     }
 };
